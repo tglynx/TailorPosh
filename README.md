@@ -22,4 +22,4 @@ Dot source the file in a session of Powershell:
 
 Call the command with a parameter array of file names:
 
-    Get-Tailor -files one.txt, two.txt, ./logs/*.log -recurse
+    Get-Tailor -files one.txt, two.txt, ./logs/*.log -Recurse -Tail 10 -Wait

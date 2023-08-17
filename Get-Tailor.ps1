@@ -3,7 +3,8 @@
         [Parameter(Mandatory=$true)]
         [string[]]$Files,
         [switch]$Recurse,
-        [switch]$Prefix, 
+        [switch]$Prefix,
+        [switch]$Wait,
         [long]$Tail = 1
     )
 
@@ -53,10 +54,15 @@
     workflow Tailor {
         param (
             [string[]]$logFiles,
-            [long]$Tail
+            [long]$Tail,
+            [bool]$Wait
         )
         foreach -parallel ($file in $logFiles) {
-            Get-Content -wait -Tail $Tail $file 
+            if ($Wait) {  
+                Get-Content -Wait -Tail $tail $file 
+            } else {
+                Get-Content -Tail $tail $file
+            }
         }
     }
 
@@ -70,7 +76,7 @@
     }
 
     if ($expandedLogFiles.Count -gt 0) {
-        tailor $expandedLogFiles $tail | highlight
+        tailor $expandedLogFiles $Tail -Wait:$Wait| highlight
     } else {
         Write-Host "No valid log files found."
     }
