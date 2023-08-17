@@ -5,28 +5,37 @@
         [switch]$Recurse,
         [switch]$Prefix,
         [switch]$Wait,
-        [long]$Tail = 1
+        [long]$Tail = 1,
+        [string]$Settings
     )
 
     $colors = @("Yellow", "Cyan", "Magenta", "Green", "Blue")
 
     function Get-Settings {
-        $localSettingsPath = "Tailor.json"
-        $templateSettingsPath = "$env:SystemXInstallRepository\templates\Tailor.json"
-
-        if (Test-Path $localSettingsPath) {
-            return Get-Content $localSettingsPath | ConvertFrom-Json
-        } elseif (Test-Path $templateSettingsPath) {
-            return Get-Content $templateSettingsPath | ConvertFrom-Json
+        param (
+            [string]$Settings  
+        )
+    
+        $defaultSettings = "Tailor.json"
+        
+        if ($Settings) {
+            if (Test-Path $Settings) {
+                return Get-Content $Settings | ConvertFrom-Json
+            } else {
+                Write-Host "Custom settings file not found: $Settings"
+                break
+            }
+        } elseif (Test-Path $defaultSettings) {
+            return Get-Content $defaultSettings | ConvertFrom-Json
         } else {
-            Write-Host "No Tailor.json found in local directory or template path."
-            exit
+            Write-Host "No Tailor.json found in local directory."
+            break
         }
     }
 
     function highlight {
         Begin {
-            $settings = Get-Settings
+            $settings = Get-Settings -Settings $Settings
         }
         Process {
             $serviceName = (Split-Path $_.PSParentPath -Leaf)
@@ -58,7 +67,7 @@
             [bool]$Wait
         )
         foreach -parallel ($file in $logFiles) {
-            if ($Wait) {  
+            if ($Wait -eq $true) {  
                 Get-Content -Wait -Tail $tail $file 
             } else {
                 Get-Content -Tail $tail $file
@@ -83,4 +92,4 @@
 }
 
 # Usage example
-# Get-Tailor -files "C:\path\to\log1.log", "./log/*" -Recurse -Prefix
+# Get-Tailor -files "C:\path\to\log1.log", "./log/*" -Recurse -Prefix -Wait -Tail 10 -Settings "C:\scripts\mysettings.json"
