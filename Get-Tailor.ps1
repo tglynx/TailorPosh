@@ -73,7 +73,6 @@
     } else {
         Write-Host "No valid log files found."
     }
-
 }
 
 # Usage example
