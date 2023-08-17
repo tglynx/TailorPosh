@@ -1,11 +1,10 @@
 ﻿function Get-Tailor {
     param (
         [Parameter(Mandatory=$true)]
-        [string[]]$files,
-
+        [string[]]$Files,
         [switch]$Recurse,
-
-        [long]$tail = 1
+        [switch]$Prefix, 
+        [long]$Tail = 1
     )
 
     $colors = @("Yellow", "Cyan", "Magenta", "Green", "Blue")
@@ -32,9 +31,11 @@
             $serviceName = (Split-Path $_.PSParentPath -Leaf)
             $serviceColor = $colors[([math]::Abs($serviceName.GetHashCode()) % $colors.Length)]
 
-            $matched = $false
+            if ($Prefix) {  # Check if the -Prefix switch is enabled
+                Write-Host ("[$serviceName] " + $_.PSChildName) -NoNewline -ForegroundColor $serviceColor
+            }
 
-            Write-Host ("[$serviceName] " + $_.PSChildName ) -NoNewline -ForegroundColor $serviceColor
+            $matched = $false
 
             foreach ($setting in $settings.rules) {
                 if ($_ -match $setting.match) {
@@ -49,13 +50,13 @@
         }
     }
 
-    workflow tailor {
+    workflow Tailor {
         param (
             [string[]]$logFiles,
-            [long]$tail
+            [long]$Tail
         )
         foreach -parallel ($file in $logFiles) {
-            Get-Content -wait -tail $tail $file 
+            Get-Content -wait -Tail $Tail $file 
         }
     }
 
@@ -63,7 +64,7 @@
 
     $expandedLogFiles = @()
 
-    foreach ($file in $files) {
+    foreach ($file in $Files) {
         $fileItems = Get-ChildItem -Path $file -Recurse:$Recurse -File | Where-Object { Test-Path $_.FullName }
         $expandedLogFiles += $fileItems | Select-Object -ExpandProperty FullName
     }
@@ -76,4 +77,4 @@
 }
 
 # Usage example
-# Get-Tailor -files "C:\path\to\log1.log", "./log/*" -Recurse
+# Get-Tailor -files "C:\path\to\log1.log", "./log/*" -Recurse -Prefix

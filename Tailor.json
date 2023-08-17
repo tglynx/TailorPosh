@@ -1,12 +1,28 @@
 ﻿{
     "rules": [
         {
+            "match": "ERROR",
+            "color": "Red"
+        },
+        {
             "match": "FATAL",
+            "color": "Red"
+        },
+        {
+            "match": "FAILED",
             "color": "Red"
         },
         {
             "match": "WARNING",
             "color": "Yellow"
+        },
+        {
+            "match": "SUCCESS",
+            "color": "Green"
+        },
+        {
+            "match": "READY",
+            "color": "Green"
         },
         {
             "match": "DEBUG",
